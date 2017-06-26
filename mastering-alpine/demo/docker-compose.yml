@@ -1,0 +1,65 @@
+version: '2'
+services:
+  full:
+    container_name: full
+    image: demo/full
+    build:
+      context: .
+      dockerfile: dockerfiles/full
+  binary:
+    container_name: binary
+    image: demo/binary
+    build:
+      context: .
+      dockerfile: dockerfiles/binary
+    ports:
+      - "8082:8080"
+  mirror:
+    container_name: mirror
+    image: demo/mirror
+    build:
+      context: .
+      dockerfile: dockerfiles/mirror
+    environment:
+      REPO: /data
+    volumes:
+     - /data
+  server:
+    image: demo/server
+    container_name: server
+    ports:
+      - "8080:80"
+    build:
+      context: .
+      dockerfile: dockerfiles/server
+    volumes_from:
+      - mirror
+    command: /data
+  base:
+    image: demo/base
+    build:
+      context: .
+      dockerfile: dockerfiles/base
+  package:
+    container_name: package
+    image: demo/package
+    build:
+      context: .
+      dockerfile: dockerfiles/package
+      args:
+        - UID=${UID}
+    volumes_from:
+      - mirror
+    volumes:
+      - ./assets/keys:/tmp/keys
+    environment:
+      PACKAGER_PRIVKEY: /tmp/keys/package.rsa
+  hello:
+    container_name: hello
+    image: demo/hello
+    build:
+      context: .
+      dockerfile: dockerfiles/hello
+    ports:
+      - "8081:8080"
+

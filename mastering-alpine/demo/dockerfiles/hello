@@ -1,0 +1,5 @@
+FROM demo/base
+
+RUN apk --no-cache add hello
+
+CMD ["/usr/bin/hello"]

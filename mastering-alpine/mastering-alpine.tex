@@ -1,0 +1,143 @@
+\documentclass[aspectratio=169]{beamer}
+\usetheme{Perso}
+
+\usepackage[outputdir=build]{minted}
+\setminted{breaklines}
+\newminted{text}{frame=single}
+\usemintedstyle{tango}
+\graphicspath{ {images/} }
+
+\title{Mastering Alpine Linux}
+\date{\today}
+\author{Maxime Vidori}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+\begin{frame}{Alpine?}{Never heard of it...}
+  What's in the box?
+  \begin{itemize}
+    \item \textbf{provide a package manager and a small footprint} (v3.5 \char`~4MB).
+    \item Based on busybox and musl-libc.
+    \item Can be used as a distribution and come with a grsec kernel.
+  \end{itemize}
+  How can this help me?
+  \begin{itemize}
+    \item Easier to understand and deploy.
+    \item Force you to invest time in your system, and production
+      environment.
+    \item Reduce security risks by mastering your toolchain,
+      \textbf{no more third party unknown containers!}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Alpine?}{musl libc}
+  \begin{block}{musl}
+    \textit{lightweight, fast, simple, free,} and strives to be
+    \textit{correct} in the sense of standards-conformance and safety.
+    \end{block}
+  \begin{itemize}
+    \item Replacement for the \textbf{glibc}, works most of the time.
+    \item \textbf{\char`~600KB} vs \textbf{\char`~8MB} for complete .so set.
+    \item Some softwares will not compile (I am looking at you \textbf{systemd}).
+  \item You can still install it, but this is sketchy and not
+      recommended outside a chroot (see the documentation).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Alpine?}{busybox}
+  \begin{block}{busybox}
+    The Swiss Army knife of Embedded Linux
+  \end{block}
+  \begin{itemize}
+    \item Simple binary with minimal versions of common UNIX utilities
+      (rm, ls, ...).
+    \item Minimal size (\textbf{\char`~2MB})
+    \item Primarily designed as a recovery tool.
+    \item Used by major projects such as Debian for the installation.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Alpine?}{apk}
+  \textbf{apk} is the tool used to install, upgrade, or delete software on a running alpine system.
+
+  \begin{itemize}
+    \item introduce some other dependencies: libcrypto, libssl, libz.
+    \item more convenient than a basic scratch image.
+    \item good tooling and documentation.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{When not to use it}
+  \begin{itemize}
+    \item The use of \textit{musl-libc} as the core library can cause some
+      dependencies to not build.
+    \item When building big images the small footprint is no longer an advantage
+      (cross compiler can be really huge).
+    \item Package library is not exhaustive (10GB big, for main and community),
+      this is not a debian distribution,
+      if a lot of dependencies are involved do not use it.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Tooling}{tips and tricks!}
+  \begin{itemize}
+    \item virtual package, remove dev dependencies easily\\
+      (golang containers can have size reduced from \textbf{\char`~200MB} to
+      \textbf{\char`~11MB})
+    \item create local mirror for packages (only \char`~5GB for the main repo),
+      allow rapid offline builds, push your custom packages.
+    \item custom packages Alpine package description file is based on Gentoo Linux
+      \textbf{ebuilds}, an easy way to package is to check Archlinux AUR for examples.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Tooling}{tips and tricks!}
+  \begin{itemize}
+\item Start your mirror server\\
+      \mintinline{shell}{docker run -p "8080:80" demo/server}
+    \item Build your image \\ \mintinline{text}{docker build -t demo/base:1.0 .}
+      \begin{minted}{docker}
+FROM alpine:3.5
+RUN echo "http://bridge.ip:8080" > /etc/apk/repositories
+ADD repo-key.rsa.pub /etc/apk/keys
+      \end{minted}
+
+    \item Use your pipeline!
+      \begin{minted}{docker}
+FROM demo/base:1.0
+RUN apk add --no-cache -t dependencies hello ...
+      \end{minted}
+
+  \end{itemize}
+  \flushright{Just use \textbf{minikube} or \textbf{compose}!}
+
+\end{frame}
+
+\begin{frame}{Demo!}
+  \LARGE \textbf{... What could possibly go wrong?}
+\end{frame}
+
+\begin{frame}{Conclusion}
+  \begin{itemize}
+    \item When building containers, think size, think network, think build time.
+    \item Be sure to use the right tools for the right thing.
+    \item Before starting new tools, look at what already exists.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{That's all folks}
+  \LARGE \textbf{Questions?}
+
+  \begin{flushright}
+    \normalsize \color{Green}IxDay\color{Grey}/mastering-alpine
+   \end{flushright}
+\end{frame}
+
+
+\end{document}

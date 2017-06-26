@@ -1,0 +1,7 @@
+FROM alpine:3.5
+
+RUN echo "http://172.17.0.1:8080" > /etc/apk/repositories && \
+	echo "http://dl-cdn.alpinelinux.org/alpine/v3.5/community" >> /etc/apk/repositories
+
+COPY assets/keys/package.rsa.pub /etc/apk/keys
+RUN apk update
